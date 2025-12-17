@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	//"fmt"
 	"log"
 
 	"github.com/Skulllalka/bot_on_go/clients/telegram"
@@ -14,7 +14,7 @@ const (
 
 func main() {
 
-	tgClient = telegram.New(tgBotHOST, mustToken())
+	tgClient := telegram.New(tgBotHOST, mustToken())
 
 	//fetcher = fetcher.New()
 
