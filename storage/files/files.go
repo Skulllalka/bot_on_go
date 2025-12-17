@@ -3,6 +3,7 @@ package files
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -55,6 +56,37 @@ func (s Storage) Save(page *storage.Page) (err error) {
 	}
 
 	return nil
+}
+
+func (s Storage) Remove(p *storage.Page) error {
+
+	fileName, err := fileName(p)
+	if err != nil {
+		return e.Wrap("can't remove file", err)
+	}
+
+	filePath := filepath.Join(s.basePath, p.UserName, fileName)
+
+	if err := os.Remove(filePath); err != nil {
+		return e.Wrap(fmt.Sprintf("can't remove file with name: %s", filePath), err)
+	}
+
+	return nil
+}
+
+func (s *Storage) IsExists(page *storage.Page) (bool, error) {
+	fileName, err := fileName(page)
+	if err != nil {
+		return false, e.Wrap("can't reach file", err)
+	}
+	filePath := filepath.Join(s.basePath, page.UserName, fileName)
+	switch _, err := os.Stat(filePath); {
+	case errors.Is(err, os.ErrNotExist):
+		return false, nil
+	case err != nil:
+		return false, e.Wrap(fmt.Sprintf("can't reach the file %s", filePath), err)
+	}
+	return true, nil
 }
 
 func (s Storage) PickRandom(userName string) (page *storage.Page, err error) {
