@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	//"fmt"
 	"log"
 
@@ -33,4 +34,6 @@ func mustToken() string {
 	}
 
 	return *token
+
+	fmt.Println("some ol++")
 }
