@@ -4,13 +4,18 @@ import (
 	"flag"
 	"fmt"
 	"log"
+
+	"github.com/Skulllalka/bot_on_go/clients/telegram"
+)
+
+const (
+	tgBotHOST = "api.telegram.org"
 )
 
 func main() {
-	token := mustToken()
 
-	// tgClient = telegram.New(token)
-	
+	tgClient = telegram.New(tgBotHOST, mustToken())
+
 	//fetcher = fetcher.New()
 
 	//processor = processor.New()
@@ -18,11 +23,11 @@ func main() {
 	//fmt.Println("hello world")
 }
 
-func mustToken() string{
+func mustToken() string {
 	token := flag.String("token-bot-token", "", "token for access to telegram bot")
 
 	flag.Parse()
-	
+
 	if *token == "" {
 		log.Fatal("token is empty")
 	}
