@@ -35,5 +35,4 @@ func mustToken() string {
 
 	return *token
 
-	fmt.Println("some ol++")
 }
