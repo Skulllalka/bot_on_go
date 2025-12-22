@@ -60,7 +60,7 @@ func (p *Processor) savePage(chatID int, pageURL string, username string) error 
 		return e.Wrap("can't send message with ", err)
 	}
 
-	return p.storage.Remove(page)
+	return nil
 }
 
 func (p *Processor) sendHelp(chatID int) error {
@@ -80,6 +80,10 @@ func (p *Processor) sendRandom(chatId int, username string) error {
 	}
 	if err := p.tg.SendMessage(chatId, page.URL); err != nil {
 		return e.Wrap("can't send message", err)
+	}
+
+	if err := p.storage.Remove(page); err != nil {
+		return e.Wrap("can't remove page after sending", err)
 	}
 	return nil
 }
