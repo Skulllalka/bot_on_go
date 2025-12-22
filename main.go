@@ -41,5 +41,3 @@ func mustToken() string {
 	return *token
 
 }
-
-//.\bot_on_go.exe -tg-bot-token '8378863236:AAHo9QlsKwGmA0NIvL1WRrZ8tv92IDWz4Gw'
