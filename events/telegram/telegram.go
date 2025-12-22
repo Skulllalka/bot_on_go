@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"errors"
+
 	"github.com/Skulllalka/bot_on_go/clients/telegram"
 	"github.com/Skulllalka/bot_on_go/events"
 	e "github.com/Skulllalka/bot_on_go/lib"
@@ -18,6 +20,11 @@ type Meta struct {
 	Username string
 }
 
+var (
+	ErrUnknownEventType = errors.New("unknown event type")
+	ErrUnknownMetaType  = errors.New("unknown meta type")
+)
+
 func New(client *telegram.Client, storage storage.Storage) *Processor {
 	return &Processor{
 		tg:      client,
@@ -28,7 +35,7 @@ func New(client *telegram.Client, storage storage.Storage) *Processor {
 func (p *Processor) Fetch(limit int) ([]events.Event, error) {
 	updates, err := p.tg.Updates(p.offset, limit)
 	if err != nil {
-		return nil, e.Wrap("can't get udpate: ", err)
+		return nil, e.Wrap("can't get update", err)
 	}
 
 	if len(updates) == 0 {
@@ -46,9 +53,29 @@ func (p *Processor) Fetch(limit int) ([]events.Event, error) {
 func (p *Processor) Process(event events.Event) error {
 	switch event.Type {
 	case events.Message:
-
+		return p.processMessage(event)
 	default:
+		return ErrUnknownEventType
 	}
+}
+
+func (p *Processor) processMessage(event events.Event) error {
+	meta, err := meta(event)
+	if err != nil {
+		return e.Wrap("can't process message", err)
+	}
+	if err := p.doCmd(event.Text, meta.ChatID, meta.Username); err != nil {
+		return e.Wrap("can't process message", err)
+	}
+	return nil
+}
+
+func meta(event events.Event) (Meta, error) {
+	res, ok := event.Meta.(Meta)
+	if !ok {
+		return Meta{}, ErrUnknownMetaType
+	}
+	return res, nil
 }
 
 func event(upd telegram.Update) events.Event {
@@ -75,8 +102,8 @@ func fetchType(upd telegram.Update) events.Type {
 	return events.Message
 }
 
-func fetchText(upd telegram.Update) events.Text {
-	if upd.Message.Text == nil {
+func fetchText(upd telegram.Update) string {
+	if upd.Message == nil {
 		return ""
 	}
 	return upd.Message.Text

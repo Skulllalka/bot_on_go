@@ -14,10 +14,8 @@ import (
 )
 
 const (
-	defaultPerm = 0774
+	defaultPerm = 0777
 )
-
-var errNoSavedPages = errors.New("page not saved")
 
 type Storage struct {
 	basePath string
@@ -46,7 +44,7 @@ func (s Storage) Save(page *storage.Page) (err error) {
 	filePath = filepath.Join(filePath, fName)
 	file, err := os.Create(filePath)
 	if err != nil {
-		return nil
+		return err
 	}
 	defer func() {
 		_ = file.Close()
@@ -97,7 +95,7 @@ func (s Storage) PickRandom(userName string) (page *storage.Page, err error) {
 		return nil, e.Wrap("can't open dir", err)
 	}
 	if len(files) == 0 {
-		return nil, errNoSavedPages
+		return nil, storage.ErrNoSavedPages
 	}
 	rand.Seed(time.Now().UnixNano())
 	n := rand.Intn(len(files))
