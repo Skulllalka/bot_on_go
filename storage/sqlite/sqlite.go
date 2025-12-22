@@ -6,6 +6,7 @@ import (
 
 	e "github.com/Skulllalka/bot_on_go/lib"
 	"github.com/Skulllalka/bot_on_go/storage"
+	_ "modernc.org/sqlite"
 )
 
 type Storage struct {
@@ -13,7 +14,7 @@ type Storage struct {
 }
 
 func New(path string) (*Storage, error) {
-	db, err := sql.Open("sqlite3", path)
+	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, e.Wrap("can't connect to db", err)
 	}
@@ -25,7 +26,7 @@ func New(path string) (*Storage, error) {
 }
 
 func (s *Storage) Save(ctx context.Context, p *storage.Page) error {
-	query := `INSERT INTO pages (url, username) VALUES (?, ?)`
+	query := `INSERT INTO pages (url, user_name) VALUES (?, ?)`
 	if _, err := s.db.ExecContext(ctx, query, p.URL, p.UserName); err != nil {
 		return e.Wrap("can't write a query", err)
 	}
@@ -37,7 +38,7 @@ func (s *Storage) PickRandom(ctx context.Context, username string) (*storage.Pag
 	var url string
 	err := s.db.QueryRowContext(ctx, query, username).Scan(&url)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, storage.ErrNoSavedPages
 	}
 	if err != nil {
 		return nil, e.Wrap("can't pick url", err)
