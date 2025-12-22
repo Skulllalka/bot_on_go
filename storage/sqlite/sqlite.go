@@ -67,3 +67,12 @@ func (s *Storage) IsExists(ctx context.Context, p *storage.Page) (bool, error) {
 	}
 	return count > 0, nil
 }
+
+func (s *Storage) Init(ctx context.Context) error {
+	query := `CREATE TABLE IF NOT EXISTS pages (url TEXT, user_name TEXT)`
+	_, err := s.db.ExecContext(ctx, query)
+	if err != nil {
+		return e.Wrap("can't crate main table", err)
+	}
+	return nil
+}
